@@ -17,7 +17,7 @@ allowed_reviews <- c("Overwhelmingly Positive",
                      "Negative")
 df <- df[df$`Recent Reviews Summary` %in% allowed_reviews, ]
 
-#If 'All Reviews Summary' is empty (or NA) assume its 'Recent Reviews Summary':
+#If 'All Reviews Summary' is empty (or NA), assume its 'Recent Reviews Summary':
 df$`All Reviews Summary`[is.na(df$`All Reviews Summary`)] <- df$`Recent Reviews Summary`[is.na(df$`All Reviews Summary`)]
 
 #Replace FREE with 0 in 'Original Price' and 'Discounted Price'
