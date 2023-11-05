@@ -34,5 +34,42 @@ Top10_Developers <- Steam_Games_Dataset_Expanded %>%
   slice_max(order_by = SumUserReviews, n = 10)
 
 # Check 
-View(Steam_Games_Dataset[c('All Reviews Number', 'UserReviews', 'GameDevelopers')])
+#View(Steam_Games_Dataset[c('All Reviews Number', 'UserReviews', 'GameDevelopers')])
 View(Top10_Developers)
+
+## Find the popular tags and its tag counts based on the Top10_Developers
+## Afterwards Find the most Popular tag for each of the top 10 developers 
+## If there is the same tag counts, add both tags into the element
+## Get the first tag with the assuming of first tag is the most popular tag from the element
+
+# Step 1: Get games only developed by top 10 developers
+games_from_top_developers <- Steam_Games_Dataset %>%
+  filter(GameDevelopers %in% Top10_Developers$GameDevelopers)
+
+# Step 2: Split 'Popular Tags' into individual rows and count them per developer
+tags_count <- games_from_top_developers %>%
+  separate_rows(`Popular Tags`, sep = ";") %>%
+  group_by(GameDevelopers, `Popular Tags`) %>%
+  summarise(TagCount = n(), .groups = 'drop') %>%
+  ungroup()
+
+# Step 3: Get the most popular tags. In case of tie, concatenate tags.
+top_tags_per_developer <- tags_count %>%
+  arrange(GameDevelopers, desc(TagCount)) %>%
+  group_by(GameDevelopers) %>%
+  filter(TagCount == max(TagCount)) %>%
+  summarise(CombinedTags = toString(`Popular Tags`), .groups = 'drop')
+
+# Step 4: Join the top tags with the top developers dataframe
+Top10_Developers_With_Tags <- Top10_Developers %>%
+  left_join(top_tags_per_developer, by = "GameDevelopers")
+
+# Step 5: Extract the first tag for use in plots
+Top10_Developers_With_Tags <- Top10_Developers_With_Tags %>%
+  mutate(FirstTag = word(CombinedTags, 1))
+
+#Code here
+
+#Result
+View(Top10_Developers_With_Tags)
+
