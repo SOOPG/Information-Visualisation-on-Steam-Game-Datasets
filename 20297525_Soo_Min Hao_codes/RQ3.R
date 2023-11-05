@@ -1,30 +1,32 @@
-pacman::p_load(pacman,dplyr,GGally,ggmosaic,ggplot2,ggthemes,ggvis,httr,lubridate,plotly,rio,rmarkdown,shiny,stringr,tidyr)
+pacman::p_load(pacman, dplyr, GGally, ggmosaic, ggplot2, ggthemes, ggvis, httr, lubridate, plotly, rio, rmarkdown, shiny, stringr, tidyr, readxl)
 
-library(readxl)
+Steam_Games_Dataset <- read_excel("C:/Users/wilem/OneDrive/Desktop/Desktop Apps/UNM/Year 3/Fundamentals of InfoViz/CW1/Information-Visualisation-on-Steam-Game-Datasets/Steam Games Dataset.xlsx")
+
+# Load dataset
 Steam_Games_Dataset <- read_excel("C:/Users/wilem/OneDrive/Desktop/Desktop Apps/UNM/Year 3/Fundamentals of InfoViz/CW1/Information-Visualisation-on-Steam-Game-Datasets/Steam Games Dataset.xlsx")
 
 # Convert All Reviews Number column into only numerics
 Steam_Games_Dataset <- Steam_Games_Dataset %>%
   mutate(
-    # Extract the numeric part after the percentage 
     UserReviewsStr = str_extract(`All Reviews Number`, "(?<=of the )\\d+[\\d,]*"),
-    UserReviewsStr = str_replace_all(UserReviewsStr, ",", ""), # Remove comma if it's a value of thousand with a separator
-    UserReviews = as.numeric(UserReviewsStr) # Convert the string to a numeric value
+    UserReviewsStr = str_replace_all(UserReviewsStr, ",", ""),
+    UserReviews = as.numeric(UserReviewsStr)
   )
 
 # Extract the Developer column from the dataset and add it as a new column
 Steam_Games_Dataset <- Steam_Games_Dataset %>%
   mutate(GameDevelopers = Developer)
 
+# Clean up developer names
+Steam_Games_Dataset <- Steam_Games_Dataset %>%
+  mutate(GameDevelopers = str_replace(GameDevelopers, ", Inc\\.|\\(Mac\\)| Co\\. Ltd\\.", ""))
+
 # Remove all rows containing any NAs
 Steam_Games_Dataset <- Steam_Games_Dataset %>%
   drop_na()
 
-# Sum up all User Reviews 
-# Avoid splitting on commas followed by known company suffixes eg: Ltd and LLC
+# Sum up all User Reviews without altering the state for specific company suffixes
 Steam_Games_Dataset_Expanded <- Steam_Games_Dataset %>%
-  mutate(GameDevelopers = gsub(", Inc\\.", " Inc.", gsub(", Ltd\\.", " Ltd.", Developer))) %>%
-  separate_rows(GameDevelopers, sep = ",\\s*(?![^,]+\\.)") %>%
   group_by(GameDevelopers) %>%
   summarise(SumUserReviews = sum(UserReviews, na.rm = TRUE)) %>%
   ungroup()
@@ -68,8 +70,34 @@ Top10_Developers_With_Tags <- Top10_Developers %>%
 Top10_Developers_With_Tags <- Top10_Developers_With_Tags %>%
   mutate(FirstTag = word(CombinedTags, 1))
 
-#Code here
+# Step 6: Remove any special symbols from extracted tag
+Top10_Developers_With_Tags <- Top10_Developers_With_Tags %>%
+  mutate(FirstTag = str_replace_all(FirstTag, "[^\\w\\s]", ""))
 
 #Result
 View(Top10_Developers_With_Tags)
+
+##Code here Mosaic plot
+# Create the mosaic plot
+mosaic_plot <- ggplot(data = Top10_Developers_With_Tags) +
+  geom_mosaic(aes(weight = SumUserReviews, x = product(GameDevelopers), fill = FirstTag), na.rm = TRUE) +
+  theme_minimal() +  # Use a minimal theme as a base
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8), # Rotate x labels for readability and adjust size
+    axis.text.y = element_text(size = 8), # Adjust y-axis text size if needed
+    legend.position = "right", # Place legend to the side to avoid covering the plot
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), # Adjust title styling
+    plot.margin = unit(c(1, 1, 1, 1), "cm") # Adjust plot margins to use space effectively
+  ) +
+  scale_fill_brewer(palette = "Set3") + # Use a colorblind-friendly palette
+  labs(
+    title = "Mosaic Plot of Top 10 Game Developers and Their Most Popular Tag",
+    x = "Game Developers",
+    y = "Sum of User Reviews",
+    fill = "First Tag"
+  ) +
+  coord_flip() # Flip the coordinates if it makes the labels more readable
+
+# Display the plot
+print(mosaic_plot)
 
