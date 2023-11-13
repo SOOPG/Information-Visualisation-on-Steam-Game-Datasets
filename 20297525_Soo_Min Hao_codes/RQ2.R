@@ -28,10 +28,14 @@ df$`Discounted Price`[df$`Discounted Price` == "FREE"] <- 0
 df$`Original Price` <- as.numeric(gsub("\\$", "", df$`Original Price`))
 df$`Discounted Price` <- as.numeric(gsub("\\$", "", df$`Discounted Price`))
 
+# Convert prices to numeric again to ensure they are numeric
+df$`Original Price` <- as.numeric(as.character(df$`Original Price`))
+df$`Discounted Price` <- as.numeric(as.character(df$`Discounted Price`))
+
 #Remove 'Non-Available (NA)' values on both column
 df <- df[!is.na(df$`Original Price`) & !is.na(df$`Discounted Price`), ]
 
-# Convert 'All Reviews Summary' into x-axis
+# Convert Review Category into x-axis
 review_levels <- c("Overwhelmingly Negative", 
                    "Very Negative", 
                    "Mostly Negative", 
@@ -42,40 +46,32 @@ review_levels <- c("Overwhelmingly Negative",
                    "Overwhelmingly Positive")
 df$`All Reviews Summary` <- factor(df$`All Reviews Summary`, levels = review_levels)
 
-# Boxplot for 'Original Price' vs. 'All Reviews Summary' 
-original_price_plot <- ggplot(df, aes(x=`All Reviews Summary`, y=`Original Price`)) + 
-  geom_boxplot(outlier.shape = NA) +  # Exclude outliers from plot
-  coord_cartesian(ylim = c(0, 50)) + # Adjust y-axis limit 
-  scale_y_continuous(breaks = seq(0, 50, by = 5)) + # Adjust y-axis breaks
-  theme_minimal() + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(hjust = 0.5)) +
-  labs(title="Original Price vs. All Reviews Summary",
-       x="All Reviews Summary",
-       y="Original Price")
-# Display the plot
-original_price_plot
-# Interactive plot
-interactive_original_price_plot <- ggplotly(original_price_plot)
-# Display interactive plot
-interactive_original_price_plot
+# Filter out games with 'Original Price' and 'Discounted Price' greater than $70
+df <- df[df$`Original Price` <= 70 & df$`Discounted Price` <= 70, ]
 
-# Boxplot for 'Discounted Price' vs. 'All Reviews Summary'
-discounted_price_plot <- ggplot(df, aes(x=`All Reviews Summary`, y=`Discounted Price`)) + 
-  geom_boxplot(outlier.shape = NA) +  # Exclude outliers from plot
-  coord_cartesian(ylim = c(0, 50)) + # Adjust y-axis limit 
-  scale_y_continuous(breaks = seq(0, 50, by = 5)) + # Adjust y-axis breaks
-  theme_minimal() + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(hjust = 0.5)) +
-  labs(title="Discounted Price vs. All Reviews Summary",
-       x="All Reviews Summary",
-       y="Discounted Price")
-# Display the plot
-discounted_price_plot
-# Interactive plot
-interactive_discounted_price_plot <- ggplotly(discounted_price_plot)
-# Display interactive plot
-interactive_discounted_price_plot
+# Add a new column 'Price Difference'
+df$`Price Difference` <- df$`Original Price` - df$`Discounted Price`
+
+# Filter out games where it has no discount
+df <- df[df$`Price Difference` > 0, ]
 
 View(df)
+
+# Create a combined 'Price' column and a 'Type' column to distinguish between original and discounted prices
+df_long <- df %>%
+  select(`All Reviews Summary`, `Original Price`, `Discounted Price`) %>%
+  gather(key = "Type", value = "Price", -`All Reviews Summary`)
+
+# Generate the density plot faceted by review category
+density_plot <- ggplot(df_long, aes(x = Price, fill = Type)) +
+  geom_density(alpha = 0.7) +
+  facet_wrap(~ `All Reviews Summary`, scales = "free") +
+  scale_fill_manual(values = c("Original Price" = "blue", "Discounted Price" = "red")) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  labs(title = "Density Plot of Game Prices by User Review Category",
+       x = "Price",
+       y = "Density")
+
+# Display the plot
+print(density_plot)
