@@ -1,4 +1,4 @@
-pacman::p_load(pacman, dplyr, GGally, ggmosaic, ggplot2, ggthemes, ggvis, httr, lubridate, plotly, rio, rmarkdown, shiny, stringr, tidyr, readxl)
+pacman::p_load(pacman, dplyr, GGally, ggmosaic, ggplot2, ggthemes, ggvis, httr, lubridate, plotly, rio, rmarkdown, scales, shiny, stringr, tidyr, readxl)
 
 Steam_Games_Dataset <- read_excel("C:/Users/wilem/OneDrive/Desktop/Desktop Apps/UNM/Year 3/Fundamentals of InfoViz/CW1/Information-Visualisation-on-Steam-Game-Datasets/Steam Games Dataset.xlsx")
 
@@ -39,7 +39,7 @@ Top10_Developers <- Steam_Games_Dataset_Expanded %>%
 #View(Steam_Games_Dataset[c('All Reviews Number', 'UserReviews', 'GameDevelopers')])
 View(Top10_Developers)
 
-## Find the popular tags and its tag counts based on the Top10_Developers
+ m       ## Find the popular tags and its tag counts based on the Top10_Developers
 ## Afterwards Find the most Popular tag for each of the top 10 developers 
 ## If there is the same tag counts, add both tags into the element
 ## Get the first tag with the assuming of first tag is the most popular tag from the element
@@ -74,30 +74,19 @@ Top10_Developers_With_Tags <- Top10_Developers_With_Tags %>%
 Top10_Developers_With_Tags <- Top10_Developers_With_Tags %>%
   mutate(FirstTag = str_replace_all(FirstTag, "[^\\w\\s]", ""))
 
-#Result
-View(Top10_Developers_With_Tags)
-
-##Code here Mosaic plot
-# Create the mosaic plot
-mosaic_plot <- ggplot(data = Top10_Developers_With_Tags) +
-  geom_mosaic(aes(weight = SumUserReviews, x = product(GameDevelopers), fill = FirstTag), na.rm = TRUE) +
-  theme_minimal() +  # Use a minimal theme as a base
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8), # Rotate x labels for readability and adjust size
-    axis.text.y = element_text(size = 8), # Adjust y-axis text size if needed
-    legend.position = "right", # Place legend to the side to avoid covering the plot
-    plot.title = element_text(size = 12, face = "bold", hjust = 0.5), # Adjust title styling
-    plot.margin = unit(c(1, 1, 1, 1), "cm") # Adjust plot margins to use space effectively
-  ) +
-  scale_fill_brewer(palette = "Set3") + # Use a colorblind-friendly palette
+# add scale_y_continuous to format the y-axis
+stacked_bar_plot <- ggplot(Top10_Developers_With_Tags, aes(x = reorder(GameDevelopers, -SumUserReviews), y = SumUserReviews, fill = FirstTag)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set3") +
   labs(
-    title = "Mosaic Plot of Top 10 Game Developers and Their Most Popular Tag",
+    title = "Stacked Bar Chart of Top 10 Game Developers by User Reviews and Popular Tag",
     x = "Game Developers",
     y = "Sum of User Reviews",
     fill = "First Tag"
   ) +
-  coord_flip() # Flip the coordinates if it makes the labels more readable
+  scale_y_continuous(labels = label_comma()) # Format the y-axis labels
 
 # Display the plot
-print(mosaic_plot)
-
+print(stacked_bar_plot)

@@ -69,7 +69,7 @@ density_plot <- ggplot(df_long, aes(x = Price, fill = Type)) +
   scale_fill_manual(values = c("Original Price" = "blue", "Discounted Price" = "red")) +
   theme_minimal() +
   theme(legend.position = "bottom") +
-  labs(title = "Density Plot of Game Prices by User Review Category",
+  labs(title = "Density Plot of Game Prices until 70$ by User Review Category",
        x = "Price",
        y = "Density")
 
