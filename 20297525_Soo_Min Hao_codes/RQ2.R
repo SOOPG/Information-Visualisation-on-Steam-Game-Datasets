@@ -18,7 +18,7 @@ pacman::p_load(pacman,
                readxl)
 
 # Define the file path for dataset
-file_path <- "path_to/Steam_Games_Dataset.xlsx"
+file_path <- "C:/Users/wilem/OneDrive/Desktop/Desktop Apps/UNM/Year 3/Fundamentals of InfoViz/CW1/Information-Visualisation-on-Steam-Game-Datasets/Steam Games Dataset.xlsx"
 
 # Read the dataset
 steam_reviews <- read_excel(file_path)
