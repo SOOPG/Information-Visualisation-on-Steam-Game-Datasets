@@ -1,3 +1,4 @@
+#Load libraries
 pacman::p_load(pacman, 
                dplyr, 
                GGally, 
@@ -24,11 +25,11 @@ Steam_Games_Dataset <- Steam_Games_Dataset %>%
     Early_Access = ifelse(grepl("Early Access", `Popular Tags`), "Yes", "No")
   )
 
+# Step 2: Get review category from column 'All Reviews Summary'
 # Categorical 
 allowed_reviews <- c("Overwhelmingly Positive", "Very Positive", "Mostly Positive", "Positive",
                      "Mixed", "Negative", "Mostly Negative", "Very Negative", "Overwhelmingly Negative")
 
-# Step 2: Get review category from column 'All Reviews Summary'
 Steam_Games_Dataset <- Steam_Games_Dataset %>%
   filter(`Recent Reviews Summary` %in% allowed_reviews)
 # If 'All Reviews Summary' is empty (or NA), assume it's 'Recent Reviews Summary':

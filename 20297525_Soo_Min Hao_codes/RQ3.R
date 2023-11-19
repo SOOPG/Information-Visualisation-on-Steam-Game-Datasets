@@ -1,6 +1,21 @@
-pacman::p_load(pacman, dplyr, GGally, ggmosaic, ggplot2, ggthemes, ggvis, httr, lubridate, plotly, rio, rmarkdown, scales, shiny, stringr, tidyr, readxl)
-
-Steam_Games_Dataset <- read_excel("C:/Users/wilem/OneDrive/Desktop/Desktop Apps/UNM/Year 3/Fundamentals of InfoViz/CW1/Information-Visualisation-on-Steam-Game-Datasets/Steam Games Dataset.xlsx")
+#Load libraries
+pacman::p_load(pacman, 
+               dplyr, 
+               GGally, 
+               ggmosaic, 
+               ggplot2, 
+               ggthemes, 
+               ggvis, 
+               httr, 
+               lubridate, 
+               plotly, 
+               rio, 
+               rmarkdown, 
+               scales, 
+               shiny, 
+               stringr, 
+               tidyr, 
+               readxl)
 
 # Load dataset
 Steam_Games_Dataset <- read_excel("C:/Users/wilem/OneDrive/Desktop/Desktop Apps/UNM/Year 3/Fundamentals of InfoViz/CW1/Information-Visualisation-on-Steam-Game-Datasets/Steam Games Dataset.xlsx")

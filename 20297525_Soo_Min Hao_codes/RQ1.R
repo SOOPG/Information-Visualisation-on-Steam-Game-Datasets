@@ -1,6 +1,21 @@
 #Load libraries
-pacman::p_load(pacman,dplyr,GGally,ggplot2,ggthemes,ggvis,httr,lubridate,plotly,rio,rmarkdown,shiny,stringr,tidyr)
-library(readxl)
+pacman::p_load(pacman, 
+               dplyr, 
+               GGally, 
+               ggmosaic, 
+               ggplot2, 
+               ggthemes, 
+               ggvis, 
+               httr, 
+               lubridate, 
+               plotly, 
+               rio, 
+               rmarkdown, 
+               scales, 
+               shiny, 
+               stringr, 
+               tidyr, 
+               readxl)
 
 # Read the dataset
 file_path <- "C:/Users/wilem/OneDrive/Desktop/Desktop Apps/UNM/Year 3/Fundamentals of InfoViz/CW1/Information-Visualisation-on-Steam-Game-Datasets/Steam Games Dataset.xlsx"

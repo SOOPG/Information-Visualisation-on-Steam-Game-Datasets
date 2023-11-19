@@ -1,12 +1,29 @@
-pacman::p_load(pacman,dplyr,GGally,ggplot2,ggthemes,ggvis,httr,lubridate,plotly,rio,rmarkdown,shiny,stringr,tidyr)
+#Load libraries
+pacman::p_load(pacman, 
+               dplyr, 
+               GGally, 
+               ggmosaic, 
+               ggplot2, 
+               ggthemes, 
+               ggvis, 
+               httr, 
+               lubridate, 
+               plotly, 
+               rio, 
+               rmarkdown, 
+               scales, 
+               shiny, 
+               stringr, 
+               tidyr, 
+               readxl)
 
-library(readxl)
-Steam_Games_Dataset <- read_excel("C:/Users/wilem/OneDrive/Desktop/Desktop Apps/UNM/Year 3/Fundamentals of InfoViz/CW1/Information-Visualisation-on-Steam-Game-Datasets/Steam Games Dataset.xlsx")
+# Define the file path for dataset
+file_path <- "path_to/Steam_Games_Dataset.xlsx"
 
-# Create a working dataframe
-df <- Steam_Games_Dataset
+# Read the dataset
+steam_reviews <- read_excel(file_path)
 
-#Filter rows based on steam categorical reviews for 'Recent Reviews Summary':
+# Filter rows based on categorical reviews for 'Recent Reviews Summary'
 allowed_reviews <- c("Overwhelmingly Positive", 
                      "Very Positive", 
                      "Mostly Positive", 
@@ -15,27 +32,27 @@ allowed_reviews <- c("Overwhelmingly Positive",
                      "Very Negative", 
                      "Mostly Negative", 
                      "Negative")
-df <- df[df$`Recent Reviews Summary` %in% allowed_reviews, ]
+steam_reviews <- steam_reviews[steam_reviews$`Recent Reviews Summary` %in% allowed_reviews, ]
 
-#If 'All Reviews Summary' is empty (or NA), assume its 'Recent Reviews Summary':
-df$`All Reviews Summary`[is.na(df$`All Reviews Summary`)] <- df$`Recent Reviews Summary`[is.na(df$`All Reviews Summary`)]
+# If 'All Reviews Summary' is empty (or NA), use 'Recent Reviews Summary'
+steam_reviews$`All Reviews Summary`[is.na(steam_reviews$`All Reviews Summary`)] <- steam_reviews$`Recent Reviews Summary`[is.na(steam_reviews$`All Reviews Summary`)]
 
-#Replace FREE with 0 in 'Original Price' and 'Discounted Price'
-df$`Original Price`[df$`Original Price` == "FREE"] <- 0
-df$`Discounted Price`[df$`Discounted Price` == "FREE"] <- 0
+# Replace 'FREE' with 0 in 'Original Price' and 'Discounted Price'
+steam_reviews$`Original Price`[steam_reviews$`Original Price` == "FREE"] <- 0
+steam_reviews$`Discounted Price`[steam_reviews$`Discounted Price` == "FREE"] <- 0
 
-#Remove the $ sign on both dataset columns
-df$`Original Price` <- as.numeric(gsub("\\$", "", df$`Original Price`))
-df$`Discounted Price` <- as.numeric(gsub("\\$", "", df$`Discounted Price`))
+# Remove the $ sign and convert prices to numeric values
+steam_reviews$`Original Price` <- as.numeric(gsub("\\$", "", steam_reviews$`Original Price`))
+steam_reviews$`Discounted Price` <- as.numeric(gsub("\\$", "", steam_reviews$`Discounted Price`))
 
-# Convert prices to numeric again to ensure they are numeric
-df$`Original Price` <- as.numeric(as.character(df$`Original Price`))
-df$`Discounted Price` <- as.numeric(as.character(df$`Discounted Price`))
+# Ensure prices are numeric
+steam_reviews$`Original Price` <- as.numeric(as.character(steam_reviews$`Original Price`))
+steam_reviews$`Discounted Price` <- as.numeric(as.character(steam_reviews$`Discounted Price`))
 
-#Remove 'Non-Available (NA)' values on both column
-df <- df[!is.na(df$`Original Price`) & !is.na(df$`Discounted Price`), ]
+# Remove rows with NA values in both price columns
+steam_reviews <- steam_reviews[!is.na(steam_reviews$`Original Price`) & !is.na(steam_reviews$`Discounted Price`), ]
 
-# Convert Review Category into x-axis
+# Factorize 'All Reviews Summary' based on the review levels
 review_levels <- c("Overwhelmingly Negative", 
                    "Very Negative", 
                    "Mostly Negative", 
@@ -44,24 +61,24 @@ review_levels <- c("Overwhelmingly Negative",
                    "Mostly Positive", 
                    "Very Positive", 
                    "Overwhelmingly Positive")
-df$`All Reviews Summary` <- factor(df$`All Reviews Summary`, levels = review_levels)
+steam_reviews$`All Reviews Summary` <- factor(steam_reviews$`All Reviews Summary`, levels = review_levels)
 
-# Filter out games with 'Original Price' and 'Discounted Price' greater than $70
-df <- df[df$`Original Price` <= 70 & df$`Discounted Price` <= 70, ]
+# Filter out games with prices greater than $70
+steam_reviews <- steam_reviews[steam_reviews$`Original Price` <= 70 & steam_reviews$`Discounted Price` <= 70, ]
 
-# Add a new column 'Price Difference'
-df$`Price Difference` <- df$`Original Price` - df$`Discounted Price`
+# Add a 'Price Difference' column
+steam_reviews$`Price Difference` <- steam_reviews$`Original Price` - steam_reviews$`Discounted Price`
 
-# Filter out games where it has no discount
-df <- df[df$`Price Difference` > 0, ]
+# Filter out games with no discount
+steam_reviews <- steam_reviews[steam_reviews$`Price Difference` > 0, ]
 
-# Create a combined 'Price' column and a 'Type' column to distinguish between original and discounted prices
-df_long <- df %>%
+# Prepare the data for visualization
+prices_long_format <- steam_reviews %>%
   select(`All Reviews Summary`, `Original Price`, `Discounted Price`) %>%
   gather(key = "Type", value = "Price", -`All Reviews Summary`)
 
-# Generate the density plot faceted by review category
-density_plot <- ggplot(df_long, aes(x = Price, fill = Type)) +
+# Generate and display the density plot faceted by review category
+density_plot <- ggplot(prices_long_format, aes(x = Price, fill = Type)) +
   geom_density(alpha = 0.7) +
   facet_wrap(~ `All Reviews Summary`, scales = "free") +
   scale_fill_manual(values = c("Original Price" = "blue", "Discounted Price" = "red")) +
@@ -71,7 +88,5 @@ density_plot <- ggplot(df_long, aes(x = Price, fill = Type)) +
        x = "Price",
        y = "Density")
 
-# Display the plot
 print(density_plot)
 
-View(df)
