@@ -40,7 +40,6 @@ Steam_Games_Dataset <- Steam_Games_Dataset %>%
 Steam_Games_Dataset <- Steam_Games_Dataset %>%
   filter(Online_Players == 1 | Singleplayer == 1)
 
-# If you want to further process the data or summarize it
 # For example, count the number of games with each feature
 feature_counts <- Steam_Games_Dataset %>%
   summarise(
@@ -101,3 +100,4 @@ p <- ggplot(Steam_Games_Dataset_filtered, aes(x = UserReviews, y = PositiveRevie
 ggplotly(p) %>%
   layout(legend = list(orientation = "h", x = 0.3, y = -0.1)) %>% # Adjust legend position
   config(tooltip = list(mode = "closest")) # Configure tooltips
+

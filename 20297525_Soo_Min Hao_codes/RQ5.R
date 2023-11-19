@@ -33,15 +33,18 @@ Steam_Games_Dataset <- Steam_Games_Dataset %>%
     Publisher_Type = ifelse(Publisher %in% major_publishers, "Major", "Indie")
   )
 
+# Categorical 
+allowed_reviews <- c("Overwhelmingly Positive", "Very Positive", "Mostly Positive", "Positive",
+                     "Mixed", "Negative", "Mostly Negative", "Very Negative", "Overwhelmingly Negative")
+
 Steam_Games_Dataset <- Steam_Games_Dataset %>%
   filter(`Recent Reviews Summary` %in% allowed_reviews)
 
 # If 'All Reviews Summary' is empty (or NA), assume it's 'Recent Reviews Summary':
 Steam_Games_Dataset$`All Reviews Summary`[is.na(Steam_Games_Dataset$`All Reviews Summary`)] <- Steam_Games_Dataset$`Recent Reviews Summary`[is.na(Steam_Games_Dataset$`All Reviews Summary`)]
 
-# Replace FREE with 0 in 'Original Price' and 'Discounted Price'
+# Replace FREE with 0 in 'Original Price'
 Steam_Games_Dataset$`Original Price`[Steam_Games_Dataset$`Original Price` == "FREE"] <- 0
-Steam_Games_Dataset$`Discounted Price`[Steam_Games_Dataset$`Discounted Price` == "FREE"] <- 0
 
 # Remove the $ sign and convert prices to numeric
 Steam_Games_Dataset <- Steam_Games_Dataset %>%
@@ -50,9 +53,9 @@ Steam_Games_Dataset <- Steam_Games_Dataset %>%
     `Discounted Price` = as.numeric(gsub("\\$", "", `Discounted Price`))
   )
 
-# Remove 'Non-Available (NA)' values in both price columns
+# Remove 'Non-Available (NA)' values in original price columns
 Steam_Games_Dataset <- Steam_Games_Dataset %>%
-  filter(!is.na(`Original Price`) & !is.na(`Discounted Price`))
+  filter(!is.na(`Original Price`))
 
 # View the modified dataset
 View(Steam_Games_Dataset)
@@ -72,3 +75,4 @@ ggplot(average_prices, aes(x = `All Reviews Summary`, y = Average_Price, fill = 
   theme_minimal() +
   scale_fill_manual(values = c("Indie" = "skyblue", "Major" = "orange")) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis text for readability
+

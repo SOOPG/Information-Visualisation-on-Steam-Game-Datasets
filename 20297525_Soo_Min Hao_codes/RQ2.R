@@ -55,8 +55,6 @@ df$`Price Difference` <- df$`Original Price` - df$`Discounted Price`
 # Filter out games where it has no discount
 df <- df[df$`Price Difference` > 0, ]
 
-View(df)
-
 # Create a combined 'Price' column and a 'Type' column to distinguish between original and discounted prices
 df_long <- df %>%
   select(`All Reviews Summary`, `Original Price`, `Discounted Price`) %>%
@@ -75,3 +73,5 @@ density_plot <- ggplot(df_long, aes(x = Price, fill = Type)) +
 
 # Display the plot
 print(density_plot)
+
+View(df)

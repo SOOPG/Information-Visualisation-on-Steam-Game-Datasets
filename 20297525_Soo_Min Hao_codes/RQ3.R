@@ -8,9 +8,9 @@ Steam_Games_Dataset <- read_excel("C:/Users/wilem/OneDrive/Desktop/Desktop Apps/
 # Convert All Reviews Number column into only numerics
 Steam_Games_Dataset <- Steam_Games_Dataset %>%
   mutate(
-    UserReviewsStr = str_extract(`All Reviews Number`, "(?<=of the )\\d+[\\d,]*"),
-    UserReviewsStr = str_replace_all(UserReviewsStr, ",", ""),
-    UserReviews = as.numeric(UserReviewsStr)
+    UserReviews = str_extract(`All Reviews Number`, "(?<=of the )\\d+[\\d,]*"),
+    UserReviews = str_replace_all(UserReviews, ",", ""),
+    UserReviews = as.numeric(UserReviews)
   )
 
 # Extract the Developer column from the dataset and add it as a new column
@@ -39,10 +39,6 @@ Top10_Developers <- Steam_Games_Dataset_Expanded %>%
 #View(Steam_Games_Dataset[c('All Reviews Number', 'UserReviews', 'GameDevelopers')])
 View(Top10_Developers)
 
- m       ## Find the popular tags and its tag counts based on the Top10_Developers
-## Afterwards Find the most Popular tag for each of the top 10 developers 
-## If there is the same tag counts, add both tags into the element
-## Get the first tag with the assuming of first tag is the most popular tag from the element
 
 # Step 1: Get games only developed by top 10 developers
 games_from_top_developers <- Steam_Games_Dataset %>%
@@ -81,7 +77,7 @@ stacked_bar_plot <- ggplot(Top10_Developers_With_Tags, aes(x = reorder(GameDevel
   theme_minimal() +
   scale_fill_brewer(palette = "Set3") +
   labs(
-    title = "Stacked Bar Chart of Top 10 Game Developers by User Reviews and Popular Tag",
+    title = "Top 10 Game Developers by User Reviews and Their Game's Primary Tag",
     x = "Game Developers",
     y = "Sum of User Reviews",
     fill = "First Tag"
